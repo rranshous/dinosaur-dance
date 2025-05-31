@@ -102,7 +102,7 @@ class DinosaurDanceGame {
     
     private spawnCelebrationCreatures(): void {
         const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
-        const celebrationCount = 8; // Burst of celebration creatures
+        const celebrationCount = 3; // Just a gentle celebration burst!
         
         for (let i = 0; i < celebrationCount; i++) {
             setTimeout(() => {
@@ -110,53 +110,37 @@ class DinosaurDanceGame {
                 creature.className = 'dinosaur celebration-creature';
                 creature.textContent = currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
                 
-                // Spawn from random edges of the screen
-                const edge = Math.floor(Math.random() * 4);
-                let startX, startY, endX, endY;
+                // Spawn more gently from the top center, spreading outward
+                const centerX = window.innerWidth / 2;
+                const spread = 200; // Much smaller spread
+                const startX = centerX + (Math.random() - 0.5) * spread;
+                const startY = -80;
                 
-                switch (edge) {
-                    case 0: // Top
-                        startX = Math.random() * window.innerWidth;
-                        startY = -100;
-                        endX = Math.random() * window.innerWidth;
-                        endY = window.innerHeight / 2 + Math.random() * 200 - 100;
-                        break;
-                    case 1: // Right
-                        startX = window.innerWidth + 100;
-                        startY = Math.random() * window.innerHeight;
-                        endX = window.innerWidth / 2 + Math.random() * 200 - 100;
-                        endY = Math.random() * window.innerHeight;
-                        break;
-                    case 2: // Bottom
-                        startX = Math.random() * window.innerWidth;
-                        startY = window.innerHeight + 100;
-                        endX = Math.random() * window.innerWidth;
-                        endY = window.innerHeight / 2 + Math.random() * 200 - 100;
-                        break;
-                    default: // Left
-                        startX = -100;
-                        startY = Math.random() * window.innerHeight;
-                        endX = window.innerWidth / 2 + Math.random() * 200 - 100;
-                        endY = Math.random() * window.innerHeight;
-                }
+                // End positions are more subtle - just below the center area
+                const endX = centerX + (Math.random() - 0.5) * spread * 1.5;
+                const endY = window.innerHeight * 0.4 + Math.random() * 100;
                 
                 creature.style.left = startX + 'px';
                 creature.style.top = startY + 'px';
+                // Add a special class to protect these from any cleanup
+                creature.setAttribute('data-celebration', 'true');
                 document.body.appendChild(creature);
                 
-                // Animate movement across the canvas
+                // Animate movement with a gentle arc
                 setTimeout(() => {
-                    creature.style.transition = 'left 3s ease-out, top 3s ease-out';
+                    creature.style.transition = 'left 2s ease-out, top 2s ease-out';
                     creature.style.left = endX + 'px';
                     creature.style.top = endY + 'px';
-                }, 50);
+                }, 100);
                 
-                // Remove after animation completes
+                // Remove after animation completes (shorter duration)
                 setTimeout(() => {
-                    creature.remove();
-                }, 4000);
+                    if (creature.parentNode) {
+                        creature.remove();
+                    }
+                }, 3000);
                 
-            }, i * 200); // Stagger the spawning
+            }, i * 400); // More staggered timing for elegance
         }
     }
     
@@ -268,6 +252,10 @@ class DinosaurDanceGame {
         plantedDinosaur.textContent = this.cursorDinosaur.textContent;
         plantedDinosaur.style.left = `${x - 30}px`;
         plantedDinosaur.style.top = `${y - 30}px`;
+        
+        // Add protective attributes to ensure these stay safe
+        plantedDinosaur.setAttribute('data-planted', 'true');
+        plantedDinosaur.setAttribute('data-creation-time', Date.now().toString());
         
         // Add some random rotation for variety
         const randomRotation = Math.random() * 20 - 10;
