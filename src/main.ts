@@ -5,6 +5,14 @@ class DinosaurDanceGame {
     private cursorDinosaur: HTMLElement;
     private plantedDinosaurs: HTMLElement[] = [];
     
+    // Painting mode for continuous brush strokes!
+    private isMouseDown: boolean = false;
+    private lastPlantTime: number = 0;
+    private brushDelay: number = 100; // milliseconds between brush strokes
+    
+    // Background evolution with the artwork
+    private backgroundHue: number = 200; // Starting blue-green
+    
     // Thematic collections for visual consistency with variety!
     private emojiSets = {
         prehistoric: ['🦕', '🦴', '🐊', '🐲', '🦖', '🐉'],
@@ -28,6 +36,7 @@ class DinosaurDanceGame {
         this.createCursorDinosaur();
         this.setupEventListeners();
         this.updateCounter();
+        this.evolveBackground(); // Initialize the beautiful background
     }
 
     private createCursorDinosaur(): void {
@@ -45,6 +54,24 @@ class DinosaurDanceGame {
     private getRandomEvolutionCount(): number {
         // Organic evolution timing: between 6-12 plantings for delightful unpredictability
         return Math.floor(Math.random() * 7) + 6; // 6-12 inclusive
+    }
+    
+    private tryBrushStroke(x: number, y: number): void {
+        const now = Date.now();
+        if (now - this.lastPlantTime >= this.brushDelay) {
+            this.plantDinosaur(x, y);
+        }
+    }
+    
+    private evolveBackground(): void {
+        // Subtle color evolution - shift hue gradually
+        this.backgroundHue = (this.backgroundHue + 2) % 360;
+        const saturation = 30 + (this.dancerCount % 20); // Slightly more saturated as we add more
+        const lightness = 85 - (this.dancerCount % 15); // Slightly darker as canvas fills
+        
+        document.body.style.background = `linear-gradient(135deg, 
+            hsl(${this.backgroundHue}, ${saturation}%, ${lightness}%), 
+            hsl(${(this.backgroundHue + 30) % 360}, ${saturation + 10}%, ${lightness + 5}%))`;
     }
     
     private evolveToNextSet(): void {
@@ -139,11 +166,22 @@ class DinosaurDanceGame {
         document.addEventListener('mousemove', (e) => {
             this.cursorDinosaur.style.left = `${e.clientX - 30}px`;
             this.cursorDinosaur.style.top = `${e.clientY - 30}px`;
+            
+            // Continuous painting when mouse is held down!
+            if (this.isMouseDown) {
+                this.tryBrushStroke(e.clientX, e.clientY);
+            }
         });
 
-        // Plant dinosaur on click
-        document.addEventListener('click', (e) => {
+        // Start painting stroke
+        document.addEventListener('mousedown', (e) => {
+            this.isMouseDown = true;
             this.plantDinosaur(e.clientX, e.clientY);
+        });
+
+        // End painting stroke
+        document.addEventListener('mouseup', () => {
+            this.isMouseDown = false;
         });
 
         // Plant dinosaur on right click (and prevent context menu)
@@ -203,6 +241,10 @@ class DinosaurDanceGame {
         this.plantedDinosaurs.push(plantedDinosaur);
         this.dancerCount++;
         this.updateCounter();
+        this.lastPlantTime = Date.now();
+
+        // Evolve the background subtly with each placement
+        this.evolveBackground();
 
         // Track plantings in current set and evolve when ready
         this.plantingsInCurrentSet++;
@@ -244,6 +286,11 @@ class DinosaurDanceGame {
         this.plantingsInCurrentSet = 0;
         this.plantingsBeforeSetChange = this.getRandomEvolutionCount();
         this.cursorDinosaur.textContent = this.getRandomDinosaur();
+        
+        // Reset background to starting state
+        this.backgroundHue = 200;
+        this.evolveBackground();
+        
         this.updateCounter();
     }
 
@@ -271,11 +318,13 @@ document.addEventListener('DOMContentLoaded', () => {
     new DinosaurDanceGame();
     
     // Add some helpful instructions
-    console.log('🦕 Welcome to Dinosaur Dance Evolution!');
+    console.log('🎨 Welcome to Dinosaur Dance Evolution - Painting Edition!');
     console.log('• Move your mouse to see the cursor creature');
-    console.log('• Left click anywhere to plant a dancing creature (stickers stay forever!)');
+    console.log('• Left click to place a single dancing creature');
+    console.log('• Hold and drag to paint continuous brush strokes!');
     console.log('• Right click for an instant party (5 random creatures)!');
-    console.log('• Press "C" to clear all creatures and start fresh');
+    console.log('• Watch the background subtly evolve with your artwork');
+    console.log('• Press "C" to clear all creatures and reset canvas');
     console.log('• Press "R" for a random creature party!');
     console.log('• Press "N" to evolve to the next thematic set');
     console.log('• Press "S" to see current set info');
