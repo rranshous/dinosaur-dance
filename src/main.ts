@@ -4,15 +4,23 @@
 class DinosaurDanceGame {
     private cursorDinosaur: HTMLElement;
     private plantedDinosaurs: HTMLElement[] = [];
-    private dinosaurEmojis = [
-        '🦕', '🦴', '🐊', '🐲', '🦖', '🐉', '🦎', '🐍', 
-        '🐢', '🦂', '🕷️', '🦟', '🐛', '🦋', '🐜', '🐝',
-        '🐞', '🦗', '🐨', '🐼', '🦘', '🦥', '🦦', '🦨',
-        '🦔', '🐿️', '🐹', '🐭', '🐰', '🦊', '🐺', '🐻',
-        '🐯', '🦁', '🐸', '🐙', '🦑', '🦐', '🦀', '🐡',
-        '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐚', '⭐',
-        '🌟', '✨', '💫', '🔥', '❄️', '☄️', '🌈', '🎪'
-    ];
+    
+    // Thematic collections for visual consistency with variety!
+    private emojiSets = {
+        prehistoric: ['🦕', '🦴', '🐊', '🐲', '🦖', '🐉'],
+        reptiles: ['🦎', '🐍', '🐢', '🐊', '🐸', '🦕'],
+        insects: ['🦋', '🐝', '🐞', '🦗', '🕷️', '🦂', '🐛', '🐜', '🦟'],
+        mammals: ['🐨', '🐼', '🦘', '🦥', '🦦', '🦨', '🦔', '🐿️', '🐹', '🐭', '🐰', '🦊'],
+        predators: ['🐺', '🐻', '🐯', '🦁', '🦈', '🐉', '🦖'],
+        ocean: ['🐙', '🦑', '🦐', '🦀', '🐡', '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐚'],
+        magical: ['⭐', '🌟', '✨', '💫', '🔥', '❄️', '☄️', '🌈', '🎪']
+    };
+    
+    private currentSet: string = 'prehistoric';
+    private setOrder: string[] = ['prehistoric', 'reptiles', 'insects', 'mammals', 'predators', 'ocean', 'magical'];
+    private setIndex: number = 0;
+    private plantingsInCurrentSet: number = 0;
+    private plantingsBeforeSetChange: number = 8; // Change set every 8 plantings
     private dancerCount = 0;
 
     constructor() {
@@ -29,7 +37,75 @@ class DinosaurDanceGame {
     }
 
     private getRandomDinosaur(): string {
-        return this.dinosaurEmojis[Math.floor(Math.random() * this.dinosaurEmojis.length)];
+        const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
+        return currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
+    }
+    
+    private evolveToNextSet(): void {
+        this.setIndex = (this.setIndex + 1) % this.setOrder.length;
+        this.currentSet = this.setOrder[this.setIndex];
+        this.plantingsInCurrentSet = 0;
+        
+        // Update cursor to new set immediately for preview
+        this.cursorDinosaur.textContent = this.getRandomDinosaur();
+        
+        // Show a delightful notification of the set change
+        this.showSetChangeNotification();
+    }
+    
+    private showSetChangeNotification(): void {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            color: #4A4A4A;
+            z-index: 2000;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        `;
+        notification.textContent = `✨ Now featuring: ${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)}! ✨`;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 2000);
+    }
+    
+    private showCurrentSetInfo(): void {
+        const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
+        const info = document.createElement('div');
+        info.style.cssText = `
+            position: fixed;
+            top: 160px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            color: #4A4A4A;
+            z-index: 2000;
+            pointer-events: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 300px;
+        `;
+        info.innerHTML = `
+            <div style="font-weight: bold; margin-bottom: 5px;">${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)} Set</div>
+            <div style="font-size: 1.5em; margin: 5px 0;">${currentEmojis.join(' ')}</div>
+            <div style="font-size: 0.9em;">${this.plantingsInCurrentSet}/${this.plantingsBeforeSetChange} planted</div>
+        `;
+        document.body.appendChild(info);
+        
+        setTimeout(() => {
+            info.remove();
+        }, 3000);
     }
 
     private setupEventListeners(): void {
@@ -69,6 +145,12 @@ class DinosaurDanceGame {
                 case 'r':
                     this.randomDinosaurParty();
                     break;
+                case 'n':
+                    this.evolveToNextSet();
+                    break;
+                case 's':
+                    this.showCurrentSetInfo();
+                    break;
             }
         });
     }
@@ -96,8 +178,14 @@ class DinosaurDanceGame {
         this.dancerCount++;
         this.updateCounter();
 
-        // NOW change cursor dinosaur to a new random one for next planting
-        this.cursorDinosaur.textContent = this.getRandomDinosaur();
+        // Track plantings in current set and evolve when ready
+        this.plantingsInCurrentSet++;
+        if (this.plantingsInCurrentSet >= this.plantingsBeforeSetChange) {
+            this.evolveToNextSet();
+        } else {
+            // Change cursor dinosaur to a new random one from current set
+            this.cursorDinosaur.textContent = this.getRandomDinosaur();
+        }
 
         // Add a little celebration animation
         this.celebratePlanting(plantedDinosaur);
@@ -124,6 +212,11 @@ class DinosaurDanceGame {
         this.plantedDinosaurs.forEach(dinosaur => dinosaur.remove());
         this.plantedDinosaurs = [];
         this.dancerCount = 0;
+        // Reset to beginning of cycle for fresh start
+        this.setIndex = 0;
+        this.currentSet = this.setOrder[0];
+        this.plantingsInCurrentSet = 0;
+        this.cursorDinosaur.textContent = this.getRandomDinosaur();
         this.updateCounter();
     }
 
@@ -151,11 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
     new DinosaurDanceGame();
     
     // Add some helpful instructions
-    console.log('🦕 Welcome to Dinosaur Dance!');
+    console.log('🦕 Welcome to Dinosaur Dance Evolution!');
     console.log('• Move your mouse to see the cursor creature');
     console.log('• Left click anywhere to plant a dancing creature');
     console.log('• Right click for an instant party (5 random creatures)!');
     console.log('• Click on planted creatures to remove them');
     console.log('• Press "C" to clear all creatures');
     console.log('• Press "R" for a random creature party!');
+    console.log('• Press "N" to evolve to the next thematic set');
+    console.log('• Press "S" to see current set info');
+    console.log('• Sets auto-evolve every 8 plantings for organic progression!');
 });
