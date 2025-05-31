@@ -678,6 +678,7 @@ class DinosaurDanceGame {
         // Move ALL dancers to the edges to make a dance circle!
         const allDancers = this.plantedDinosaurs.slice(); // Copy the array
         const edgeMargin = 50; // Distance from screen edge
+        const dancerSize = 60; // Dancer elements are 60px wide/tall
         const centerRadius = Math.min(window.innerWidth, window.innerHeight) * 0.3; // Clear circle size
         
         let movedCount = 0;
@@ -702,20 +703,20 @@ class DinosaurDanceGame {
                 
                 switch (edge) {
                     case 0: // Top edge
-                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin);
-                        newY = edgeMargin;
+                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin - dancerSize);
+                        newY = Math.random() * edgeMargin; // Random position closer to the actual edge
                         break;
                     case 1: // Right edge
-                        newX = window.innerWidth - edgeMargin;
-                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin);
+                        newX = window.innerWidth - edgeMargin - dancerSize + Math.random() * (edgeMargin / 2);
+                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin - dancerSize);
                         break;
                     case 2: // Bottom edge
-                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin);
-                        newY = window.innerHeight - edgeMargin;
+                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin - dancerSize);
+                        newY = window.innerHeight - edgeMargin - dancerSize + Math.random() * (edgeMargin / 2);
                         break;
                     case 3: // Left edge
-                        newX = edgeMargin;
-                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin);
+                        newX = Math.random() * edgeMargin; // Random position closer to the actual edge
+                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin - dancerSize);
                         break;
                     default:
                         newX = currentX;
