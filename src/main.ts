@@ -4,6 +4,7 @@
 class DinosaurDanceGame {
     private cursorDinosaur: HTMLElement;
     private plantedDinosaurs: HTMLElement[] = [];
+    private tinyDancerPile: HTMLElement[] = []; // Track the pile for physics!
     
     // Painting mode for continuous brush strokes!
     private isMouseDown: boolean = false;
@@ -100,47 +101,84 @@ class DinosaurDanceGame {
         this.spawnCelebrationCreatures();
     }
     
+    private findNextPilePosition(): {x: number, y: number} {
+        const pileCenter = window.innerWidth / 2;
+        const pileSpread = Math.min(300, window.innerWidth * 0.4);
+        const baseLevel = window.innerHeight - 60; // Ground level
+        
+        // If no pile exists yet, start at the bottom center
+        if (this.tinyDancerPile.length === 0) {
+            return {
+                x: pileCenter + (Math.random() - 0.5) * 60, // Small initial spread
+                y: baseLevel
+            };
+        }
+        
+        // Find the highest point in the pile area where this dancer wants to land
+        const targetX = pileCenter + (Math.random() - 0.5) * pileSpread;
+        let highestY = baseLevel;
+        
+        // Check all existing dancers for the highest stack near our target X
+        this.tinyDancerPile.forEach(dancer => {
+            const dancerX = parseInt(dancer.style.left);
+            const dancerY = parseInt(dancer.style.top);
+            const distance = Math.abs(dancerX - targetX);
+            
+            // If this dancer is close enough horizontally, we might stack on top
+            if (distance < 40) { // Stacking proximity
+                const stackHeight = dancerY - 25; // Stack one dancer-height above
+                if (stackHeight < highestY) {
+                    highestY = stackHeight;
+                }
+            }
+        });
+        
+        return {
+            x: targetX,
+            y: highestY
+        };
+    }
+    
     private spawnCelebrationCreatures(): void {
         const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
-        const celebrationCount = 3; // Just a gentle celebration burst!
+        const celebrationCount = 6; // More tiny dancers for the pile!
         
         for (let i = 0; i < celebrationCount; i++) {
             setTimeout(() => {
                 const creature = document.createElement('div');
-                creature.className = 'dinosaur celebration-creature';
+                creature.className = 'dinosaur tiny-dancer';
                 creature.textContent = currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
                 
-                // Spawn more gently from the top center, spreading outward
-                const centerX = window.innerWidth / 2;
-                const spread = 200; // Much smaller spread
-                const startX = centerX + (Math.random() - 0.5) * spread;
-                const startY = -80;
+                // Start from random positions across the top
+                const startX = Math.random() * window.innerWidth;
+                const startY = -50;
                 
-                // End positions are more subtle - just below the center area
-                const endX = centerX + (Math.random() - 0.5) * spread * 1.5;
-                const endY = window.innerHeight * 0.4 + Math.random() * 100;
+                // Find where this dancer should land in the growing pile!
+                const landingSpot = this.findNextPilePosition();
                 
                 creature.style.left = startX + 'px';
                 creature.style.top = startY + 'px';
-                // Add a special class to protect these from any cleanup
-                creature.setAttribute('data-celebration', 'true');
+                creature.style.fontSize = '24px'; // Much smaller!
+                creature.style.zIndex = '50'; // Below everything else
+                creature.setAttribute('data-tiny-dancer', 'true');
+                
                 document.body.appendChild(creature);
                 
-                // Animate movement with a gentle arc
+                // Animate the gentle fall to the calculated pile position
                 setTimeout(() => {
-                    creature.style.transition = 'left 2s ease-out, top 2s ease-out';
-                    creature.style.left = endX + 'px';
-                    creature.style.top = endY + 'px';
+                    creature.style.transition = 'left 2.5s ease-out, top 2.5s ease-in';
+                    creature.style.left = landingSpot.x + 'px';
+                    creature.style.top = landingSpot.y + 'px';
                 }, 100);
                 
-                // Remove after animation completes (shorter duration)
+                // Once they land, they become part of the pile physics!
                 setTimeout(() => {
-                    if (creature.parentNode) {
-                        creature.remove();
-                    }
-                }, 3000);
+                    creature.classList.add('pile-dancer');
+                    creature.style.transition = 'none';
+                    this.tinyDancerPile.push(creature); // Add to pile tracking!
+                }, 2600);
                 
-            }, i * 400); // More staggered timing for elegance
+            }, i * 300); // Stagger the falling
         }
     }
     
@@ -310,9 +348,16 @@ class DinosaurDanceGame {
     }
 
     private clearAllDinosaurs(): void {
+        // Clear the main artwork
         this.plantedDinosaurs.forEach(dinosaur => dinosaur.remove());
         this.plantedDinosaurs = [];
         this.dancerCount = 0;
+        
+        // Also clear the tiny dancer pile for a complete fresh start
+        const tinyDancers = document.querySelectorAll('[data-tiny-dancer="true"]');
+        tinyDancers.forEach(dancer => dancer.remove());
+        this.tinyDancerPile = []; // Reset pile tracking!
+        
         // Reset to beginning of cycle for fresh start
         this.setIndex = 0;
         this.currentSet = this.setOrder[0];
