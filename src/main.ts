@@ -1,6 +1,16 @@
 // The magnificent dancing dinosaur game!
 // A delightful collaboration between Robby and GitHub Copilot
 
+// TypeScript declarations for Speech Recognition API
+declare global {
+    interface Window {
+        SpeechRecognition: any;
+        webkitSpeechRecognition: any;
+    }
+}
+
+export {}; // Make this file a module
+
 class DinosaurDanceGame {
     private cursorDinosaur!: HTMLElement; // Will be initialized in createCursorDinosaur
     private plantedDinosaurs: HTMLElement[] = [];
@@ -32,10 +42,15 @@ class DinosaurDanceGame {
     private plantingsBeforeSetChange: number = 8; // Will be randomized in constructor
     private dancerCount = 0;
 
+    // Voice recognition for delightful voice commands!
+    private recognition: any = null;
+    private isListening: boolean = false;
+
     constructor() {
         this.plantingsBeforeSetChange = this.getRandomEvolutionCount();
         this.createCursorDinosaur();
         this.setupEventListeners();
+        this.setupVoiceRecognition(); // Add voice magic!
         this.updateCounter();
         this.evolveBackground(); // Initialize the beautiful background
     }
@@ -225,17 +240,106 @@ class DinosaurDanceGame {
         const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
         const demoCount = Math.min(5, currentEmojis.length); // Show up to 5 examples
         
+        // Choose a random formation for each dance party! Even MORE variety!
+        const formations = ['arc', 'circle', 'line', 'random', 'spiral', 'wave', 'diamond', 'heart', 'star', 'zigzag'];
+        const formation = formations[Math.floor(Math.random() * formations.length)];
+        
         for (let i = 0; i < demoCount; i++) {
             setTimeout(() => {
                 const demoCreature = document.createElement('div');
                 demoCreature.className = 'dinosaur';
                 demoCreature.textContent = currentEmojis[i];
                 
-                // Arrange in a gentle arc across the middle of the screen
-                const arcWidth = Math.min(400, window.innerWidth * 0.6);
-                const startX = (window.innerWidth - arcWidth) / 2;
-                const x = startX + (arcWidth / (demoCount - 1)) * i;
-                const y = window.innerHeight / 2 + Math.sin((i / (demoCount - 1)) * Math.PI) * 50;
+                let x, y;
+                
+                // Different formations for variety!
+                switch (formation) {
+                    case 'arc':
+                        // Original arc formation but with random vertical offset
+                        const arcWidth = Math.min(400, window.innerWidth * 0.6);
+                        const startX = (window.innerWidth - arcWidth) / 2;
+                        x = startX + (arcWidth / (demoCount - 1)) * i;
+                        y = window.innerHeight / 2 + Math.sin((i / (demoCount - 1)) * Math.PI) * 50 + (Math.random() - 0.5) * 100;
+                        break;
+                        
+                    case 'circle':
+                        // Circular formation
+                        const radius = 120;
+                        const angle = (i / demoCount) * Math.PI * 2;
+                        x = window.innerWidth / 2 + Math.cos(angle) * radius;
+                        y = window.innerHeight / 2 + Math.sin(angle) * radius;
+                        break;
+                        
+                    case 'line':
+                        // Horizontal line with random vertical wobble
+                        const lineWidth = Math.min(500, window.innerWidth * 0.8);
+                        const lineStartX = (window.innerWidth - lineWidth) / 2;
+                        x = lineStartX + (lineWidth / (demoCount - 1)) * i;
+                        y = window.innerHeight / 2 + (Math.random() - 0.5) * 60;
+                        break;
+                        
+                    case 'spiral':
+                        // Spiral formation
+                        const spiralAngle = (i / demoCount) * Math.PI * 3;
+                        const spiralRadius = 40 + i * 20;
+                        x = window.innerWidth / 2 + Math.cos(spiralAngle) * spiralRadius;
+                        y = window.innerHeight / 2 + Math.sin(spiralAngle) * spiralRadius;
+                        break;
+                        
+                    case 'wave':
+                        // Sine wave formation
+                        const waveWidth = Math.min(500, window.innerWidth * 0.8);
+                        const waveStartX = (window.innerWidth - waveWidth) / 2;
+                        x = waveStartX + (waveWidth / (demoCount - 1)) * i;
+                        y = window.innerHeight / 2 + Math.sin((i / (demoCount - 1)) * Math.PI * 2) * 80;
+                        break;
+                        
+                    case 'diamond':
+                        // Diamond/rhombus formation
+                        if (i < demoCount / 2) {
+                            // Top half of diamond
+                            x = window.innerWidth / 2 + (i - demoCount / 4) * 60;
+                            y = window.innerHeight / 2 - (demoCount / 4 - Math.abs(i - demoCount / 4)) * 40;
+                        } else {
+                            // Bottom half of diamond
+                            const bottomI = i - Math.floor(demoCount / 2);
+                            x = window.innerWidth / 2 + (bottomI - demoCount / 4) * 60;
+                            y = window.innerHeight / 2 + (demoCount / 4 - Math.abs(bottomI - demoCount / 4)) * 40;
+                        }
+                        break;
+                        
+                    case 'heart':
+                        // Heart shape formation (simplified)
+                        const heartT = (i / (demoCount - 1)) * Math.PI * 2;
+                        const heartScale = 60;
+                        x = window.innerWidth / 2 + heartScale * (16 * Math.sin(heartT) ** 3) / 16;
+                        y = window.innerHeight / 2 - heartScale * (13 * Math.cos(heartT) - 5 * Math.cos(2 * heartT) - 2 * Math.cos(3 * heartT) - Math.cos(4 * heartT)) / 16;
+                        break;
+                        
+                    case 'star':
+                        // Star formation
+                        const starRadius = 120;
+                        const starAngle = (i / demoCount) * Math.PI * 2;
+                        const isOuterPoint = i % 2 === 0;
+                        const currentRadius = isOuterPoint ? starRadius : starRadius * 0.5;
+                        x = window.innerWidth / 2 + Math.cos(starAngle) * currentRadius;
+                        y = window.innerHeight / 2 + Math.sin(starAngle) * currentRadius;
+                        break;
+                        
+                    case 'zigzag':
+                        // Zigzag formation
+                        const zigzagWidth = Math.min(400, window.innerWidth * 0.6);
+                        const zigzagStartX = (window.innerWidth - zigzagWidth) / 2;
+                        x = zigzagStartX + (zigzagWidth / (demoCount - 1)) * i;
+                        y = window.innerHeight / 2 + (i % 2 === 0 ? -60 : 60) + (Math.random() - 0.5) * 30;
+                        break;
+                        
+                    default: // 'random'
+                        // Completely random positions in the center area
+                        x = window.innerWidth * 0.2 + Math.random() * window.innerWidth * 0.6;
+                        y = window.innerHeight * 0.3 + Math.random() * window.innerHeight * 0.4;
+                        break;
+                }
                 
                 demoCreature.style.left = x + 'px';
                 demoCreature.style.top = y + 'px';
@@ -257,6 +361,8 @@ class DinosaurDanceGame {
                 
             }, i * 150); // Stagger the appearance
         }
+        
+        console.log(`🎪 Dance party formation: ${formation}! Each one is a surprise!`);
     }
 
     private setupEventListeners(): void {
@@ -432,6 +538,129 @@ class DinosaurDanceGame {
                 setTimeout(() => {
                     title.classList.remove('dancing');
                 }, 500);
+            }
+        }
+    }
+
+    private setupVoiceRecognition(): void {
+        // Check for browser compatibility
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.warn('🎤 Speech recognition not supported in this browser.');
+            return;
+        }
+        
+        this.recognition = new SpeechRecognition();
+        this.recognition.continuous = true; // Keep listening!
+        this.recognition.interimResults = false;
+        this.recognition.maxAlternatives = 1;
+        this.recognition.lang = 'en-US';
+        
+        // Define the commands and their corresponding actions
+        // Order matters! Longer phrases should come first to avoid partial matches
+        const commands: { [key: string]: () => void } = {
+            'dance party': () => {
+                console.log('🎤 Voice command: Dance party demonstration!');
+                this.showCurrentSetInfo();
+            },
+            'stop listening': () => {
+                console.log('🎤 Voice command: Stop listening!');
+                this.stopListening();
+            },
+            'start listening': () => {
+                console.log('🎤 Voice command: Start listening!');
+                this.startListening();
+            },
+            'clear': () => {
+                console.log('🎤 Voice command: Clear all!');
+                this.clearAllDinosaurs();
+            },
+            'party': () => {
+                console.log('🎤 Voice command: Party time!');
+                this.randomDinosaurParty();
+            },
+            'next': () => {
+                console.log('🎤 Voice command: Next set!');
+                this.evolveToNextSet();
+            }
+        };
+        
+        this.recognition.onresult = (event: any) => {
+            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+            console.log('🎤 Voice input:', transcript);
+            
+            // Check if the transcript matches any command
+            for (const command in commands) {
+                if (transcript.includes(command)) {
+                    commands[command]();
+                    break;
+                }
+            }
+        };
+        
+        this.recognition.onend = () => {
+            this.isListening = false;
+            this.updateVoiceIndicator(false);
+            console.log('🎤 Voice recognition stopped.');
+            // Auto-restart unless explicitly stopped
+            setTimeout(() => {
+                if (!this.isListening) {
+                    this.startListening();
+                }
+            }, 1000);
+        };
+        
+        this.recognition.onerror = (event: any) => {
+            console.warn('🎤 Voice recognition error:', event.error);
+            this.updateVoiceIndicator(false);
+            if (event.error === 'not-allowed') {
+                console.warn('🎤 Microphone access denied. Voice commands disabled.');
+                return;
+            }
+            // Try to restart on other errors
+            setTimeout(() => {
+                if (!this.isListening) {
+                    this.startListening();
+                }
+            }, 2000);
+        };
+        
+        // Start listening for voice commands
+        console.log('🎤 Setting up voice recognition...');
+        this.startListening();
+    }
+
+    private startListening(): void {
+        if (this.recognition && !this.isListening) {
+            try {
+                this.isListening = true;
+                this.recognition.start();
+                console.log('🎤 Voice recognition started! Try saying: "clear", "party", "next", or "dance party"');
+                this.updateVoiceIndicator(true);
+            } catch (error) {
+                console.warn('🎤 Failed to start voice recognition:', error);
+                this.isListening = false;
+                this.updateVoiceIndicator(false);
+            }
+        }
+    }
+
+    private stopListening(): void {
+        if (this.recognition && this.isListening) {
+            this.recognition.stop();
+            this.isListening = false;
+            console.log('🎤 Voice recognition stopped by user command.');
+            this.updateVoiceIndicator(false);
+        }
+    }
+
+    private updateVoiceIndicator(listening: boolean): void {
+        const indicator = document.getElementById('voice-indicator');
+        if (indicator) {
+            if (listening) {
+                indicator.classList.add('listening');
+            } else {
+                indicator.classList.remove('listening');
             }
         }
     }
