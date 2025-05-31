@@ -20,10 +20,11 @@ class DinosaurDanceGame {
     private setOrder: string[] = ['prehistoric', 'reptiles', 'insects', 'mammals', 'predators', 'ocean', 'magical'];
     private setIndex: number = 0;
     private plantingsInCurrentSet: number = 0;
-    private plantingsBeforeSetChange: number = 8; // Change set every 8 plantings
+    private plantingsBeforeSetChange: number = 8; // Will be randomized in constructor
     private dancerCount = 0;
 
     constructor() {
+        this.plantingsBeforeSetChange = this.getRandomEvolutionCount();
         this.createCursorDinosaur();
         this.setupEventListeners();
         this.updateCounter();
@@ -41,10 +42,18 @@ class DinosaurDanceGame {
         return currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
     }
     
+    private getRandomEvolutionCount(): number {
+        // Organic evolution timing: between 6-12 plantings for delightful unpredictability
+        return Math.floor(Math.random() * 7) + 6; // 6-12 inclusive
+    }
+    
     private evolveToNextSet(): void {
         this.setIndex = (this.setIndex + 1) % this.setOrder.length;
         this.currentSet = this.setOrder[this.setIndex];
         this.plantingsInCurrentSet = 0;
+        
+        // Set new random evolution count for organic unpredictability
+        this.plantingsBeforeSetChange = this.getRandomEvolutionCount();
         
         // Update cursor to new set immediately for preview
         this.cursorDinosaur.textContent = this.getRandomDinosaur();
@@ -60,21 +69,38 @@ class DinosaurDanceGame {
             top: 120px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 1.2em;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.95));
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.4em;
             color: #4A4A4A;
             z-index: 2000;
             pointer-events: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 2px solid rgba(100, 150, 200, 0.3);
+            animation: celebrateEvolution 3s ease-out;
         `;
-        notification.textContent = `✨ Now featuring: ${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)}! ✨`;
+        notification.textContent = `🎉 Now featuring: ${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)}! 🎉`;
+        
+        // Add CSS animation for the celebration
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes celebrateEvolution {
+                0% { transform: translateX(-50%) scale(0.5) rotate(-5deg); opacity: 0; }
+                20% { transform: translateX(-50%) scale(1.1) rotate(2deg); opacity: 1; }
+                40% { transform: translateX(-50%) scale(0.95) rotate(-1deg); }
+                60% { transform: translateX(-50%) scale(1.05) rotate(1deg); }
+                80% { transform: translateX(-50%) scale(1) rotate(0deg); }
+                100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
         document.body.appendChild(notification);
         
         setTimeout(() => {
             notification.remove();
-        }, 2000);
+            style.remove();
+        }, 3000);
     }
     
     private showCurrentSetInfo(): void {
@@ -167,11 +193,11 @@ class DinosaurDanceGame {
         const randomRotation = Math.random() * 20 - 10;
         plantedDinosaur.style.transform = `rotate(${randomRotation}deg)`;
         
-        // Add click to remove functionality
-        plantedDinosaur.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.removeDinosaur(plantedDinosaur);
-        });
+        // Stickers are meant to stay! No more tragic removals
+        // plantedDinosaur.addEventListener('click', (e) => {
+        //     e.stopPropagation();
+        //     this.removeDinosaur(plantedDinosaur);
+        // });
 
         document.body.appendChild(plantedDinosaur);
         this.plantedDinosaurs.push(plantedDinosaur);
@@ -216,6 +242,7 @@ class DinosaurDanceGame {
         this.setIndex = 0;
         this.currentSet = this.setOrder[0];
         this.plantingsInCurrentSet = 0;
+        this.plantingsBeforeSetChange = this.getRandomEvolutionCount();
         this.cursorDinosaur.textContent = this.getRandomDinosaur();
         this.updateCounter();
     }
@@ -246,12 +273,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add some helpful instructions
     console.log('🦕 Welcome to Dinosaur Dance Evolution!');
     console.log('• Move your mouse to see the cursor creature');
-    console.log('• Left click anywhere to plant a dancing creature');
+    console.log('• Left click anywhere to plant a dancing creature (stickers stay forever!)');
     console.log('• Right click for an instant party (5 random creatures)!');
-    console.log('• Click on planted creatures to remove them');
-    console.log('• Press "C" to clear all creatures');
+    console.log('• Press "C" to clear all creatures and start fresh');
     console.log('• Press "R" for a random creature party!');
     console.log('• Press "N" to evolve to the next thematic set');
     console.log('• Press "S" to see current set info');
-    console.log('• Sets auto-evolve every 8 plantings for organic progression!');
+    console.log('• Sets auto-evolve organically (6-12 plantings) for natural surprises!');
 });
