@@ -64,14 +64,20 @@ class DinosaurDanceGame {
     }
     
     private evolveBackground(): void {
-        // Subtle color evolution - shift hue gradually
-        this.backgroundHue = (this.backgroundHue + 2) % 360;
-        const saturation = 30 + (this.dancerCount % 20); // Slightly more saturated as we add more
-        const lightness = 85 - (this.dancerCount % 15); // Slightly darker as canvas fills
+        // Much more gentle evolution - only shift every 10 placements for contemplative progression
+        if (this.dancerCount % 10 === 0) {
+            this.backgroundHue = (this.backgroundHue + 5) % 360;
+        }
         
+        // Very subtle saturation and lightness changes
+        const saturation = 25 + Math.floor(this.dancerCount / 20); // Increases every 20 creatures
+        const lightness = 88 - Math.floor(this.dancerCount / 30); // Decreases every 30 creatures
+        
+        // Smooth transition with CSS
+        document.body.style.transition = 'background 2s ease';
         document.body.style.background = `linear-gradient(135deg, 
-            hsl(${this.backgroundHue}, ${saturation}%, ${lightness}%), 
-            hsl(${(this.backgroundHue + 30) % 360}, ${saturation + 10}%, ${lightness + 5}%))`;
+            hsl(${this.backgroundHue}, ${Math.min(saturation, 40)}%, ${Math.max(lightness, 75)}%), 
+            hsl(${(this.backgroundHue + 25) % 360}, ${Math.min(saturation + 8, 45)}%, ${Math.max(lightness + 3, 78)}%))`;
     }
     
     private evolveToNextSet(): void {
