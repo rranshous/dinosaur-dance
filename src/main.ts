@@ -2,7 +2,7 @@
 // A delightful collaboration between Robby and GitHub Copilot
 
 class DinosaurDanceGame {
-    private cursorDinosaur: HTMLElement;
+    private cursorDinosaur!: HTMLElement; // Will be initialized in createCursorDinosaur
     private plantedDinosaurs: HTMLElement[] = [];
     private tinyDancerPile: HTMLElement[] = []; // Track the pile for physics!
     
@@ -369,16 +369,6 @@ class DinosaurDanceGame {
         setTimeout(() => {
             dinosaur.style.transform = dinosaur.style.transform.replace(' scale(1.5)', '');
         }, 200);
-    }
-
-    private removeDinosaur(dinosaur: HTMLElement): void {
-        const index = this.plantedDinosaurs.indexOf(dinosaur);
-        if (index > -1) {
-            this.plantedDinosaurs.splice(index, 1);
-            dinosaur.remove();
-            this.dancerCount--;
-            this.updateCounter();
-        }
     }
 
     private clearAllDinosaurs(): void {
