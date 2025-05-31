@@ -96,75 +96,111 @@ class DinosaurDanceGame {
     }
     
     private showSetChangeNotification(): void {
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed;
-            top: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 248, 255, 0.95));
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.4em;
-            color: #4A4A4A;
-            z-index: 2000;
-            pointer-events: none;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
-            border: 2px solid rgba(100, 150, 200, 0.3);
-            animation: celebrateEvolution 3s ease-out;
-        `;
-        notification.textContent = `🎉 Now featuring: ${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)}! 🎉`;
+        // Spawn celebration creatures that dance across the canvas!
+        this.spawnCelebrationCreatures();
+    }
+    
+    private spawnCelebrationCreatures(): void {
+        const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
+        const celebrationCount = 8; // Burst of celebration creatures
         
-        // Add CSS animation for the celebration
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes celebrateEvolution {
-                0% { transform: translateX(-50%) scale(0.5) rotate(-5deg); opacity: 0; }
-                20% { transform: translateX(-50%) scale(1.1) rotate(2deg); opacity: 1; }
-                40% { transform: translateX(-50%) scale(0.95) rotate(-1deg); }
-                60% { transform: translateX(-50%) scale(1.05) rotate(1deg); }
-                80% { transform: translateX(-50%) scale(1) rotate(0deg); }
-                100% { transform: translateX(-50%) scale(1) rotate(0deg); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.remove();
-            style.remove();
-        }, 3000);
+        for (let i = 0; i < celebrationCount; i++) {
+            setTimeout(() => {
+                const creature = document.createElement('div');
+                creature.className = 'dinosaur celebration-creature';
+                creature.textContent = currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
+                
+                // Spawn from random edges of the screen
+                const edge = Math.floor(Math.random() * 4);
+                let startX, startY, endX, endY;
+                
+                switch (edge) {
+                    case 0: // Top
+                        startX = Math.random() * window.innerWidth;
+                        startY = -100;
+                        endX = Math.random() * window.innerWidth;
+                        endY = window.innerHeight / 2 + Math.random() * 200 - 100;
+                        break;
+                    case 1: // Right
+                        startX = window.innerWidth + 100;
+                        startY = Math.random() * window.innerHeight;
+                        endX = window.innerWidth / 2 + Math.random() * 200 - 100;
+                        endY = Math.random() * window.innerHeight;
+                        break;
+                    case 2: // Bottom
+                        startX = Math.random() * window.innerWidth;
+                        startY = window.innerHeight + 100;
+                        endX = Math.random() * window.innerWidth;
+                        endY = window.innerHeight / 2 + Math.random() * 200 - 100;
+                        break;
+                    default: // Left
+                        startX = -100;
+                        startY = Math.random() * window.innerHeight;
+                        endX = window.innerWidth / 2 + Math.random() * 200 - 100;
+                        endY = Math.random() * window.innerHeight;
+                }
+                
+                creature.style.left = startX + 'px';
+                creature.style.top = startY + 'px';
+                document.body.appendChild(creature);
+                
+                // Animate movement across the canvas
+                setTimeout(() => {
+                    creature.style.transition = 'left 3s ease-out, top 3s ease-out';
+                    creature.style.left = endX + 'px';
+                    creature.style.top = endY + 'px';
+                }, 50);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    creature.remove();
+                }, 4000);
+                
+            }, i * 200); // Stagger the spawning
+        }
     }
     
     private showCurrentSetInfo(): void {
+        // Show set info through dancing demonstration creatures!
+        this.demonstrateCurrentSet();
+    }
+    
+    private demonstrateCurrentSet(): void {
         const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
-        const info = document.createElement('div');
-        info.style.cssText = `
-            position: fixed;
-            top: 160px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px;
-            border-radius: 25px;
-            font-size: 1.1em;
-            color: #4A4A4A;
-            z-index: 2000;
-            pointer-events: none;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            text-align: center;
-            max-width: 300px;
-        `;
-        info.innerHTML = `
-            <div style="font-weight: bold; margin-bottom: 5px;">${this.currentSet.charAt(0).toUpperCase() + this.currentSet.slice(1)} Set</div>
-            <div style="font-size: 1.5em; margin: 5px 0;">${currentEmojis.join(' ')}</div>
-            <div style="font-size: 0.9em;">${this.plantingsInCurrentSet}/${this.plantingsBeforeSetChange} planted</div>
-        `;
-        document.body.appendChild(info);
+        const demoCount = Math.min(5, currentEmojis.length); // Show up to 5 examples
         
-        setTimeout(() => {
-            info.remove();
-        }, 3000);
+        for (let i = 0; i < demoCount; i++) {
+            setTimeout(() => {
+                const demoCreature = document.createElement('div');
+                demoCreature.className = 'dinosaur';
+                demoCreature.textContent = currentEmojis[i];
+                
+                // Arrange in a gentle arc across the middle of the screen
+                const arcWidth = Math.min(400, window.innerWidth * 0.6);
+                const startX = (window.innerWidth - arcWidth) / 2;
+                const x = startX + (arcWidth / (demoCount - 1)) * i;
+                const y = window.innerHeight / 2 + Math.sin((i / (demoCount - 1)) * Math.PI) * 50;
+                
+                demoCreature.style.left = x + 'px';
+                demoCreature.style.top = y + 'px';
+                demoCreature.style.fontSize = '80px';
+                demoCreature.style.zIndex = '500';
+                demoCreature.style.animation = 'dance 0.8s infinite alternate ease-in-out';
+                
+                document.body.appendChild(demoCreature);
+                
+                // Remove after a graceful demonstration
+                setTimeout(() => {
+                    demoCreature.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
+                    demoCreature.style.opacity = '0';
+                    demoCreature.style.transform = 'scale(0.5)';
+                    setTimeout(() => {
+                        demoCreature.remove();
+                    }, 1000);
+                }, 2000);
+                
+            }, i * 150); // Stagger the appearance
+        }
     }
 
     private setupEventListeners(): void {
@@ -252,6 +288,9 @@ class DinosaurDanceGame {
         // Evolve the background subtly with each placement
         this.evolveBackground();
 
+        // Make UI elements participate in the dance!
+        this.makeUIElementsDance();
+
         // Track plantings in current set and evolve when ready
         this.plantingsInCurrentSet++;
         if (this.plantingsInCurrentSet >= this.plantingsBeforeSetChange) {
@@ -315,6 +354,28 @@ class DinosaurDanceGame {
         const counterElement = document.getElementById('dancer-count');
         if (counterElement) {
             counterElement.textContent = this.dancerCount.toString();
+            
+            // Make the counter celebrate every placement!
+            const counter = counterElement.parentElement;
+            if (counter) {
+                counter.classList.add('celebrating');
+                setTimeout(() => {
+                    counter.classList.remove('celebrating');
+                }, 400);
+            }
+        }
+    }
+    
+    private makeUIElementsDance(): void {
+        // Make the title dance occasionally (every 15 creatures)
+        if (this.dancerCount % 15 === 0 && this.dancerCount > 0) {
+            const title = document.querySelector('.title');
+            if (title) {
+                title.classList.add('dancing');
+                setTimeout(() => {
+                    title.classList.remove('dancing');
+                }, 500);
+            }
         }
     }
 }
