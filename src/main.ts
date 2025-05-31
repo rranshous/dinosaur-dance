@@ -399,24 +399,6 @@ class DinosaurDanceGame {
         document.addEventListener('mouseenter', () => {
             this.cursorDinosaur.style.display = 'block';
         });
-
-        // Add keyboard shortcuts for fun!
-        document.addEventListener('keydown', (e) => {
-            switch(e.key.toLowerCase()) {
-                case 'c':
-                    this.clearAllDinosaurs();
-                    break;
-                case 'r':
-                    this.randomDinosaurParty();
-                    break;
-                case 'n':
-                    this.evolveToNextSet();
-                    break;
-                case 's':
-                    this.showCurrentSetInfo();
-                    break;
-            }
-        });
     }
 
     private plantDinosaur(x: number, y: number): void {
@@ -553,7 +535,7 @@ class DinosaurDanceGame {
         this.recognition.lang = 'en-US';
         
         // Define the commands and their corresponding actions
-        // Order matters! Longer phrases should come first to avoid partial matches
+        // Focus on the most delightful voice commands for natural singing!
         const commands: { [key: string]: () => void } = {
             'clear dance floor': () => {
                 console.log('🎤 Voice command: Clearing dance floor!');
@@ -563,17 +545,9 @@ class DinosaurDanceGame {
                 console.log('🎤 Voice command: Dance party demonstration!');
                 this.showCurrentSetInfo();
             },
-            'clear': () => {
-                console.log('🎤 Voice command: Clear all!');
+            'restart the party': () => {
+                console.log('🎤 Voice command: Restarting the party!');
                 this.clearAllDinosaurs();
-            },
-            'party': () => {
-                console.log('🎤 Voice command: Party time!');
-                this.randomDinosaurParty();
-            },
-            'next': () => {
-                console.log('🎤 Voice command: Next set!');
-                this.evolveToNextSet();
             }
         };
         
@@ -653,7 +627,7 @@ class DinosaurDanceGame {
             try {
                 this.isListening = true;
                 this.recognition.start();
-                console.log('🎤 Voice recognition started! Try saying: "clear", "party", "next", "dance party", or "clear dance floor"');
+                console.log('🎤 Voice recognition started! Try singing: "dance party", "clear dance floor", or "restart the party"');
                 this.updateVoiceIndicator(true);
             } catch (error) {
                 console.warn('🎤 Failed to start voice recognition:', error);
@@ -746,15 +720,15 @@ document.addEventListener('DOMContentLoaded', () => {
     new DinosaurDanceGame();
     
     // Add some helpful instructions
-    console.log('🎨 Welcome to Dinosaur Dance Evolution - Painting Edition!');
+    console.log('🎨 Welcome to Dinosaur Dance Evolution - Voice-Controlled Painting Edition!');
     console.log('• Move your mouse to see the cursor creature');
     console.log('• Left click to place a single dancing creature');
     console.log('• Hold and drag to paint continuous brush strokes!');
     console.log('• Right click for an instant party (5 random creatures)!');
     console.log('• Watch the background subtly evolve with your artwork');
-    console.log('• Press "C" to clear all creatures and reset canvas');
-    console.log('• Press "R" for a random creature party!');
-    console.log('• Press "N" to evolve to the next thematic set');
-    console.log('• Press "S" to see current set info');
+    console.log('🎤 VOICE COMMANDS: Sing naturally to control your art!');
+    console.log('  🎵 "dance party" - Creates a formation demonstration');
+    console.log('  🎵 "clear dance floor" - Moves dancers to edges for solo space');
+    console.log('  🎵 "restart the party" - Clears everything for a fresh canvas');
     console.log('• Sets auto-evolve organically (6-12 plantings) for natural surprises!');
 });

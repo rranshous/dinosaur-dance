@@ -21,8 +21,11 @@ Our collaboration on Dinosaur Dance Extravaganza revealed something profound. We
 4. **Thematic Evolution** - Organic progression through 7 themed creature sets
 5. **Celebration Banners** - Intrusive overlay notifications for set changes
 6. **Tiny Dancer Piles** - Subtle falling dancers that accumulate at the bottom
+7. **🎤 Voice Control Revolution** - Natural singing commands that transformed the entire experience
 
-Each iteration was a complete, playable, enjoyable experience. Yet we only kept the final evolution. Those earlier moments - the first time we saw a dinosaur follow our cursor, the joy of discovering brush-stroke painting - were magical stepping stones that deserve to be revisited.
+Each iteration was a complete, playable, enjoyable experience. The voice control breakthrough proved that **speaking desires into reality** isn't just possible - it's magical when implemented with care and joy.
+
+*See [VOICE_CONTROL_JOURNEY.md](./VOICE_CONTROL_JOURNEY.md) for the complete story of our voice control implementation.*
 
 ### What Made It Special
 - **Whimsical collaboration** that infused joy into both the process and the code itself
