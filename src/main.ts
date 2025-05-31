@@ -103,35 +103,69 @@ class DinosaurDanceGame {
     
     private findNextPilePosition(): {x: number, y: number} {
         const pileCenter = window.innerWidth / 2;
-        const pileSpread = Math.min(300, window.innerWidth * 0.4);
-        const baseLevel = window.innerHeight - 60; // Ground level
+        const pileSpread = Math.min(800, window.innerWidth * 0.9); // Even wider spread!
+        const baseLevel = window.innerHeight - 35; // Closer to very bottom
         
-        // If no pile exists yet, start at the bottom center
+        // If no pile exists yet, start at the bottom center with wide initial spread
         if (this.tinyDancerPile.length === 0) {
             return {
-                x: pileCenter + (Math.random() - 0.5) * 60, // Small initial spread
+                x: pileCenter + (Math.random() - 0.5) * 150, // Much wider initial spread
                 y: baseLevel
             };
         }
         
-        // Find the highest point in the pile area where this dancer wants to land
+        // For dense wide carpeting, strongly prefer horizontal spreading!
         const targetX = pileCenter + (Math.random() - 0.5) * pileSpread;
         let highestY = baseLevel;
+        let nearbyDancers = 0;
         
-        // Check all existing dancers for the highest stack near our target X
+        // Check density in the target area - count dancers more broadly for better spreading
         this.tinyDancerPile.forEach(dancer => {
             const dancerX = parseInt(dancer.style.left);
             const dancerY = parseInt(dancer.style.top);
             const distance = Math.abs(dancerX - targetX);
             
-            // If this dancer is close enough horizontally, we might stack on top
-            if (distance < 40) { // Stacking proximity
-                const stackHeight = dancerY - 25; // Stack one dancer-height above
-                if (stackHeight < highestY) {
-                    highestY = stackHeight;
+            // Count dancers in this horizontal zone (wider for better density awareness)
+            if (distance < 35) {
+                nearbyDancers++;
+                
+                // Only stack if this exact spot is really crowded (4+ dancers)
+                if (nearbyDancers >= 4 && distance < 18) {
+                    const stackHeight = dancerY - 18; // Tight stacking height
+                    if (stackHeight < highestY) {
+                        highestY = stackHeight;
+                    }
                 }
             }
         });
+        
+        // Strongly prefer horizontal spreading until dense carpet is formed!
+        if (nearbyDancers < 4) {
+            // Find a less crowded spot for better wide distribution
+            let bestX = targetX;
+            let lowestDensity = nearbyDancers;
+            
+            // Try several spots across the spread to find the least dense area
+            for (let attempt = 0; attempt < 8; attempt++) {
+                const testX = pileCenter + (Math.random() - 0.5) * pileSpread;
+                let testDensity = 0;
+                
+                this.tinyDancerPile.forEach(dancer => {
+                    const dancerX = parseInt(dancer.style.left);
+                    if (Math.abs(dancerX - testX) < 35) testDensity++;
+                });
+                
+                if (testDensity < lowestDensity) {
+                    bestX = testX;
+                    lowestDensity = testDensity;
+                }
+            }
+            
+            return {
+                x: bestX,
+                y: baseLevel // Always stay at ground level for wide carpet effect!
+            };
+        }
         
         return {
             x: targetX,
@@ -141,7 +175,7 @@ class DinosaurDanceGame {
     
     private spawnCelebrationCreatures(): void {
         const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
-        const celebrationCount = 6; // More tiny dancers for the pile!
+        const celebrationCount = 8; // Even more tiny dancers for faster carpet building!
         
         for (let i = 0; i < celebrationCount; i++) {
             setTimeout(() => {
