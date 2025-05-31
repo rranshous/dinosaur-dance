@@ -4,7 +4,15 @@
 class DinosaurDanceGame {
     private cursorDinosaur: HTMLElement;
     private plantedDinosaurs: HTMLElement[] = [];
-    private dinosaurEmojis = ['🦕', '🦴', '🐊', '🐲'];
+    private dinosaurEmojis = [
+        '🦕', '🦴', '🐊', '🐲', '🦖', '🐉', '🦎', '🐍', 
+        '🐢', '🦂', '🕷️', '🦟', '🐛', '🦋', '🐜', '🐝',
+        '🐞', '🦗', '🐨', '🐼', '🦘', '🦥', '🦦', '🦨',
+        '🦔', '🐿️', '🐹', '🐭', '🐰', '🦊', '🐺', '🐻',
+        '🐯', '🦁', '🐸', '🐙', '🦑', '🦐', '🦀', '🐡',
+        '🐠', '🐟', '🐬', '🐳', '🐋', '🦈', '🐚', '⭐',
+        '🌟', '✨', '💫', '🔥', '❄️', '☄️', '🌈', '🎪'
+    ];
     private dancerCount = 0;
 
     constructor() {
@@ -36,6 +44,12 @@ class DinosaurDanceGame {
             this.plantDinosaur(e.clientX, e.clientY);
         });
 
+        // Plant dinosaur on right click (and prevent context menu)
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            this.randomDinosaurParty();
+        });
+
         // Hide cursor dinosaur when mouse leaves window
         document.addEventListener('mouseleave', () => {
             this.cursorDinosaur.style.display = 'none';
@@ -62,7 +76,8 @@ class DinosaurDanceGame {
     private plantDinosaur(x: number, y: number): void {
         const plantedDinosaur = document.createElement('div');
         plantedDinosaur.className = 'dinosaur planted-dinosaur';
-        plantedDinosaur.textContent = this.getRandomDinosaur();
+        // Plant the SAME dinosaur that's following the cursor!
+        plantedDinosaur.textContent = this.cursorDinosaur.textContent;
         plantedDinosaur.style.left = `${x - 30}px`;
         plantedDinosaur.style.top = `${y - 30}px`;
         
@@ -81,7 +96,7 @@ class DinosaurDanceGame {
         this.dancerCount++;
         this.updateCounter();
 
-        // Change cursor dinosaur to a new random one
+        // NOW change cursor dinosaur to a new random one for next planting
         this.cursorDinosaur.textContent = this.getRandomDinosaur();
 
         // Add a little celebration animation
@@ -137,9 +152,10 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add some helpful instructions
     console.log('🦕 Welcome to Dinosaur Dance!');
-    console.log('• Move your mouse to see the cursor dinosaur');
-    console.log('• Click anywhere to plant a dancing dinosaur');
-    console.log('• Click on planted dinosaurs to remove them');
-    console.log('• Press "C" to clear all dinosaurs');
-    console.log('• Press "R" for a random dinosaur party!');
+    console.log('• Move your mouse to see the cursor creature');
+    console.log('• Left click anywhere to plant a dancing creature');
+    console.log('• Right click for an instant party (5 random creatures)!');
+    console.log('• Click on planted creatures to remove them');
+    console.log('• Press "C" to clear all creatures');
+    console.log('• Press "R" for a random creature party!');
 });
