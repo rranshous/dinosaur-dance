@@ -1,7 +1,7 @@
 {
   "name": "dinosaur-dance",
   "version": "1.0.0",
-  "description": "A delightful game where dancing dinosaurs follow your cursor and stick to the screen!",
+  "description": "Revolutionary voice-controlled painting canvas where you create collaborative art by singing to dancing creatures! Features modular TypeScript architecture with organic formations and musical intensity recognition.",
   "main": "index.html",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,7 @@
     "typescript": "^5.0.0",
     "vite": "^4.4.0"
   },
-  "keywords": ["game", "dinosaur", "dance", "interactive", "cursor"],
+  "keywords": ["voice-control", "ai-collaboration", "painting", "creative-tools", "web-speech-api", "typescript", "modular-architecture", "organic-formations", "musical-intensity", "interactive-art", "innovative", "experimental"],
   "author": "Robby & GitHub Copilot",
   "license": "MIT"
 }
