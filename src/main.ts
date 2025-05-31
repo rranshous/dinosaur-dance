@@ -47,7 +47,10 @@ class DinosaurDanceGame {
         
         // Initialize managers
         this.backgroundManager = new BackgroundManager();
-        this.dancePartyManager = new DancePartyManager(this.emojiSets, this.currentSet, this.plantedDinosaurs, () => this.updateCounter());
+        this.dancePartyManager = new DancePartyManager(this.emojiSets, this.currentSet, this.plantedDinosaurs, () => {
+            this.dancerCount++;
+            this.updateCounter();
+        });
         this.voiceController = new VoiceController(this.handleVoiceCommand.bind(this));
         
         this.updateCounter();
@@ -70,6 +73,8 @@ class DinosaurDanceGame {
             case 'dance party':
                 console.log('🎤 Voice command: Dance party demonstration!');
                 this.dancePartyManager.createDanceParty(1);
+                // Trigger the delightful celebration effects!
+                this.triggerVoiceCommandCelebration();
                 break;
             case 'restart the party':
                 console.log('🎤 Voice command: Restarting the party!');
@@ -79,6 +84,8 @@ class DinosaurDanceGame {
                 const intensity = this.voiceController.getDanceIntensity(transcript);
                 console.log(`🎤 Voice command: Musical dance party with intensity ${intensity}!`);
                 this.dancePartyManager.createDanceParty(intensity);
+                // Trigger EXTRA celebration effects for musical intensity!
+                this.triggerVoiceCommandCelebration(intensity);
                 break;
         }
     }
@@ -116,7 +123,10 @@ class DinosaurDanceGame {
         this.cursorDinosaur.textContent = this.getRandomDinosaur();
         
         // Update the dance party manager with new set
-        this.dancePartyManager = new DancePartyManager(this.emojiSets, this.currentSet, this.plantedDinosaurs, () => this.updateCounter());
+        this.dancePartyManager = new DancePartyManager(this.emojiSets, this.currentSet, this.plantedDinosaurs, () => {
+            this.dancerCount++;
+            this.updateCounter();
+        });
         
         // Show a delightful notification of the set change
         this.showSetChangeNotification();
@@ -462,6 +472,74 @@ class DinosaurDanceGame {
         });
         
         console.log(`🎪 Cleared the dance floor! Moved ${movedCount} dancers to the edges to make room for a solo performance!`);
+    }
+    
+    private triggerVoiceCommandCelebration(intensity: number = 1): void {
+        // 🎵 Voice commands should trigger the same magical effects as manual planting!
+        
+        // Evolve the background to show the party is growing
+        this.evolveBackground();
+        
+        // Make UI elements dance with joy
+        this.makeUIElementsDance();
+        
+        // Spawn celebration creatures (falling dancers) - more for higher intensity!
+        const celebrationCount = Math.min(5 + intensity * 2, 12); // Scale with intensity
+        this.spawnVoiceCelebrationCreatures(celebrationCount);
+        
+        // For high intensity musical parties, trigger extra background evolution
+        if (intensity >= 3) {
+            // Extra background evolution for really intense parties!
+            setTimeout(() => {
+                this.evolveBackground();
+            }, 500);
+        }
+        
+        console.log(`🎤✨ Voice celebration triggered! Intensity: ${intensity}, falling dancers: ${celebrationCount}`);
+    }
+    
+    private spawnVoiceCelebrationCreatures(count: number): void {
+        // Similar to spawnCelebrationCreatures but specifically for voice commands
+        const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
+        
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                const creature = document.createElement('div');
+                creature.className = 'dinosaur tiny-dancer';
+                creature.textContent = currentEmojis[Math.floor(Math.random() * currentEmojis.length)];
+                
+                // Start from random positions across the top
+                const startX = Math.random() * window.innerWidth;
+                const startY = -50;
+                
+                // Find where this dancer should land in the growing pile!
+                const landingSpot = this.findNextPilePosition();
+                
+                creature.style.left = startX + 'px';
+                creature.style.top = startY + 'px';
+                creature.style.fontSize = '24px'; // Tiny dancers
+                creature.style.zIndex = '50'; // Below everything else
+                creature.setAttribute('data-tiny-dancer', 'true');
+                creature.setAttribute('data-voice-celebration', 'true'); // Mark as voice-triggered
+                
+                document.body.appendChild(creature);
+                
+                // Animate the gentle fall to the calculated pile position
+                setTimeout(() => {
+                    creature.style.transition = 'left 2.5s ease-out, top 2.5s ease-in';
+                    creature.style.left = landingSpot.x + 'px';
+                    creature.style.top = landingSpot.y + 'px';
+                }, 100);
+                
+                // Once they land, they become part of the pile physics!
+                setTimeout(() => {
+                    creature.classList.add('pile-dancer');
+                    creature.style.transition = 'none';
+                    this.tinyDancerPile.push(creature); // Add to pile tracking!
+                }, 2600);
+                
+            }, i * 200); // Slightly faster stagger for voice celebrations
+        }
     }
 }
 
