@@ -361,6 +361,100 @@ class DinosaurDanceGame {
         console.log(`🎪 Dance party formation: ${formation}! Each one is a surprise!`);
     }
 
+    private musicalDanceParty(intensity: number): void {
+        // 🎵 MUSICAL INTENSITY SCALING! More "dance" words = BIGGER PARTY!
+        const currentEmojis = this.emojiSets[this.currentSet as keyof typeof this.emojiSets];
+        const baseCount = Math.min(5, currentEmojis.length);
+        const scaledCount = Math.min(baseCount * intensity, 15); // Cap at 15 for screen sanity
+        
+        console.log(`🎵🎪 MUSICAL DANCE PARTY! Intensity ${intensity}x = ${scaledCount} dancers!`);
+        
+        // Choose formation based on intensity - more intense = more complex formations!
+        const formations = ['arc', 'circle', 'line', 'random', 'spiral', 'wave', 'diamond', 'heart', 'star', 'zigzag'];
+        const intensityFormations = intensity >= 4 ? ['heart', 'star', 'spiral'] : 
+                                   intensity >= 3 ? ['diamond', 'heart', 'star', 'wave'] : formations;
+        const formation = intensityFormations[Math.floor(Math.random() * intensityFormations.length)];
+        
+        for (let i = 0; i < scaledCount; i++) {
+            setTimeout(() => {
+                const demoCreature = document.createElement('div');
+                demoCreature.className = 'dinosaur';
+                demoCreature.textContent = currentEmojis[i % currentEmojis.length]; // Cycle through if we have more dancers than emojis
+                
+                let x, y;
+                
+                // Scale formation size based on dancer count
+                const formationScale = Math.min(1 + (scaledCount - baseCount) * 0.1, 2); // Bigger formations for more dancers
+                
+                switch (formation) {
+                    case 'arc':
+                        const arcWidth = Math.min(400 * formationScale, window.innerWidth * 0.8);
+                        const startX = (window.innerWidth - arcWidth) / 2;
+                        x = startX + (arcWidth / (scaledCount - 1)) * i;
+                        y = window.innerHeight / 2 + Math.sin((i / (scaledCount - 1)) * Math.PI) * 50 * formationScale + (Math.random() - 0.5) * 100;
+                        break;
+                        
+                    case 'circle':
+                        const radius = 120 * formationScale;
+                        const angle = (i / scaledCount) * Math.PI * 2;
+                        x = window.innerWidth / 2 + Math.cos(angle) * radius;
+                        y = window.innerHeight / 2 + Math.sin(angle) * radius;
+                        break;
+                        
+                    case 'spiral':
+                        const spiralAngle = (i / scaledCount) * Math.PI * 4; // More spirals for bigger parties
+                        const spiralRadius = 40 + i * (15 * formationScale);
+                        x = window.innerWidth / 2 + Math.cos(spiralAngle) * spiralRadius;
+                        y = window.innerHeight / 2 + Math.sin(spiralAngle) * spiralRadius;
+                        break;
+                        
+                    case 'heart':
+                        const heartT = (i / (scaledCount - 1)) * Math.PI * 2;
+                        const heartScale = 60 * formationScale;
+                        x = window.innerWidth / 2 + heartScale * (16 * Math.sin(heartT) ** 3) / 16;
+                        y = window.innerHeight / 2 - heartScale * (13 * Math.cos(heartT) - 5 * Math.cos(2 * heartT) - 2 * Math.cos(3 * heartT) - Math.cos(4 * heartT)) / 16;
+                        break;
+                        
+                    case 'star':
+                        const starRadius = 120 * formationScale;
+                        const starAngle = (i / scaledCount) * Math.PI * 2;
+                        const isOuterPoint = i % 2 === 0;
+                        const currentRadius = isOuterPoint ? starRadius : starRadius * 0.5;
+                        x = window.innerWidth / 2 + Math.cos(starAngle) * currentRadius;
+                        y = window.innerHeight / 2 + Math.sin(starAngle) * currentRadius;
+                        break;
+                        
+                    default:
+                        // For other formations, use a grid-like expansion for many dancers
+                        const gridCols = Math.ceil(Math.sqrt(scaledCount));
+                        const col = i % gridCols;
+                        const row = Math.floor(i / gridCols);
+                        const spacing = 80 * formationScale;
+                        x = window.innerWidth / 2 - (gridCols - 1) * spacing / 2 + col * spacing + (Math.random() - 0.5) * 30;
+                        y = window.innerHeight / 2 - (Math.ceil(scaledCount / gridCols) - 1) * spacing / 2 + row * spacing + (Math.random() - 0.5) * 30;
+                        break;
+                }
+                
+                demoCreature.style.left = x + 'px';
+                demoCreature.style.top = y + 'px';
+                demoCreature.style.fontSize = Math.max(60 - scaledCount * 2, 40) + 'px'; // Smaller font for more dancers
+                demoCreature.style.zIndex = '500';
+                // More intense animation for musical parties!
+                demoCreature.style.animation = `dance ${0.4 + Math.random() * 0.4}s infinite alternate ease-in-out`;
+                
+                document.body.appendChild(demoCreature);
+                
+                // Musical dance party creatures become permanent part of the artwork!
+                demoCreature.setAttribute('data-dance-party', 'true');
+                demoCreature.setAttribute('data-musical-intensity', intensity.toString());
+                this.plantedDinosaurs.push(demoCreature);
+                this.dancerCount++;
+                this.updateCounter();
+                
+            }, i * Math.max(50, 200 - scaledCount * 5)); // Faster appearance for bigger parties
+        }
+    }
+    
     private setupEventListeners(): void {
         // Follow the mouse cursor
         document.addEventListener('mousemove', (e) => {
@@ -561,6 +655,18 @@ class DinosaurDanceGame {
                 .trim();
             
             console.log('🎤 Voice input:', originalTranscript, '-> cleaned:', cleanedTranscript);
+            
+            // 🎵 MUSICAL INTENSITY DETECTION! Count repeated "dance" words for bigger parties!
+            const danceMatches = (originalTranscript.match(/dance/g) || []).length;
+            const partyMatches = (originalTranscript.match(/party/g) || []).length;
+            
+            // If they said "dance" multiple times and mentioned "party", scale up the celebration!
+            if (danceMatches >= 2 && partyMatches >= 1) {
+                const intensity = Math.min(danceMatches, 5); // Cap at 5 for sanity
+                console.log(`🎤 🎵 MUSICAL INTENSITY DETECTED! ${danceMatches} dances = ${intensity}x party!`);
+                this.musicalDanceParty(intensity);
+                return;
+            }
             
             // Sort commands by length (longest first) to avoid partial matches
             const sortedCommands = Object.keys(commands).sort((a, b) => b.length - a.length);
