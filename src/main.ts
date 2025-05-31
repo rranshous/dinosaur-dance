@@ -349,15 +349,11 @@ class DinosaurDanceGame {
                 
                 document.body.appendChild(demoCreature);
                 
-                // Remove after a graceful demonstration
-                setTimeout(() => {
-                    demoCreature.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
-                    demoCreature.style.opacity = '0';
-                    demoCreature.style.transform = 'scale(0.5)';
-                    setTimeout(() => {
-                        demoCreature.remove();
-                    }, 1000);
-                }, 2000);
+                // Dance party creatures become permanent part of the artwork!
+                demoCreature.setAttribute('data-dance-party', 'true'); // Mark as dance party formation
+                this.plantedDinosaurs.push(demoCreature);
+                this.dancerCount++;
+                this.updateCounter();
                 
             }, i * 150); // Stagger the appearance
         }
@@ -559,17 +555,13 @@ class DinosaurDanceGame {
         // Define the commands and their corresponding actions
         // Order matters! Longer phrases should come first to avoid partial matches
         const commands: { [key: string]: () => void } = {
+            'clear dance floor': () => {
+                console.log('🎤 Voice command: Clearing dance floor!');
+                this.clearDanceFloor();
+            },
             'dance party': () => {
                 console.log('🎤 Voice command: Dance party demonstration!');
                 this.showCurrentSetInfo();
-            },
-            'stop listening': () => {
-                console.log('🎤 Voice command: Stop listening!');
-                this.stopListening();
-            },
-            'start listening': () => {
-                console.log('🎤 Voice command: Start listening!');
-                this.startListening();
             },
             'clear': () => {
                 console.log('🎤 Voice command: Clear all!');
@@ -635,22 +627,13 @@ class DinosaurDanceGame {
             try {
                 this.isListening = true;
                 this.recognition.start();
-                console.log('🎤 Voice recognition started! Try saying: "clear", "party", "next", or "dance party"');
+                console.log('🎤 Voice recognition started! Try saying: "clear", "party", "next", "dance party", or "clear dance floor"');
                 this.updateVoiceIndicator(true);
             } catch (error) {
                 console.warn('🎤 Failed to start voice recognition:', error);
                 this.isListening = false;
                 this.updateVoiceIndicator(false);
             }
-        }
-    }
-
-    private stopListening(): void {
-        if (this.recognition && this.isListening) {
-            this.recognition.stop();
-            this.isListening = false;
-            console.log('🎤 Voice recognition stopped by user command.');
-            this.updateVoiceIndicator(false);
         }
     }
 
@@ -663,6 +646,71 @@ class DinosaurDanceGame {
                 indicator.classList.remove('listening');
             }
         }
+    }
+
+    private clearDanceFloor(): void {
+        // Move ALL dancers to the edges to make a dance circle!
+        const allDancers = this.plantedDinosaurs.slice(); // Copy the array
+        const edgeMargin = 50; // Distance from screen edge
+        const centerRadius = Math.min(window.innerWidth, window.innerHeight) * 0.3; // Clear circle size
+        
+        let movedCount = 0;
+        
+        allDancers.forEach((dancer) => {
+            const currentX = parseInt(dancer.style.left);
+            const currentY = parseInt(dancer.style.top);
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            
+            // Check if dancer is in the center area that needs clearing
+            const distanceFromCenter = Math.sqrt(
+                Math.pow(currentX - centerX, 2) + Math.pow(currentY - centerY, 2)
+            );
+            
+            if (distanceFromCenter < centerRadius) {
+                // Move this dancer to the edges
+                let newX, newY;
+                
+                // Choose a random edge: top, right, bottom, or left
+                const edge = Math.floor(Math.random() * 4);
+                
+                switch (edge) {
+                    case 0: // Top edge
+                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin);
+                        newY = edgeMargin;
+                        break;
+                    case 1: // Right edge
+                        newX = window.innerWidth - edgeMargin;
+                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin);
+                        break;
+                    case 2: // Bottom edge
+                        newX = edgeMargin + Math.random() * (window.innerWidth - 2 * edgeMargin);
+                        newY = window.innerHeight - edgeMargin;
+                        break;
+                    case 3: // Left edge
+                        newX = edgeMargin;
+                        newY = edgeMargin + Math.random() * (window.innerHeight - 2 * edgeMargin);
+                        break;
+                    default:
+                        newX = currentX;
+                        newY = currentY;
+                }
+                
+                // Animate the movement to the edge
+                dancer.style.transition = 'left 1.5s ease-out, top 1.5s ease-out';
+                dancer.style.left = newX + 'px';
+                dancer.style.top = newY + 'px';
+                
+                // Remove transition after animation completes
+                setTimeout(() => {
+                    dancer.style.transition = '';
+                }, 1500);
+                
+                movedCount++;
+            }
+        });
+        
+        console.log(`🎪 Cleared the dance floor! Moved ${movedCount} dancers to the edges to make room for a solo performance!`);
     }
 }
 
