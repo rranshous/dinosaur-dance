@@ -34,45 +34,8 @@ export class VoiceController {
             
             console.log('🎤 Voice input:', originalTranscript, '-> cleaned:', cleanedTranscript);
             
-            // 🎵 MUSICAL INTENSITY DETECTION! Count repeated "dance" words for bigger parties!
-            const danceMatches = (originalTranscript.match(/dance/g) || []).length;
-            const partyMatches = (originalTranscript.match(/party/g) || []).length;
-            
-            // If they said "dance" multiple times and mentioned "party", trigger musical intensity!
-            if (danceMatches >= 2 && partyMatches >= 1) {
-                const intensity = Math.min(danceMatches, 5); // Cap at 5 for sanity
-                console.log(`🎤 🎵 MUSICAL INTENSITY DETECTED! ${danceMatches} dances = ${intensity}x party!`);
-                this.onCommandCallback('musical_dance_party', originalTranscript);
-                return;
-            }
-            
-            // Standard command recognition
-            const commands = ['clear dance floor', 'dance party', 'restart the party'];
-            const sortedCommands = commands.sort((a, b) => b.length - a.length);
-            
-            // Try exact matching first on cleaned transcript
-            for (const command of sortedCommands) {
-                if (cleanedTranscript === command || cleanedTranscript.endsWith(command)) {
-                    this.onCommandCallback(command, originalTranscript);
-                    return;
-                }
-            }
-            
-            // Try exact matching on original transcript
-            for (const command of sortedCommands) {
-                if (originalTranscript === command || originalTranscript.endsWith(command)) {
-                    this.onCommandCallback(command, originalTranscript);
-                    return;
-                }
-            }
-            
-            // Fallback to includes matching
-            for (const command of sortedCommands) {
-                if (cleanedTranscript.includes(command) || originalTranscript.includes(command)) {
-                    this.onCommandCallback(command, originalTranscript);
-                    return;
-                }
-            }
+            // 🌟 ENHANCED: Parse multiple commands from a single transcript!
+            this.parseAndExecuteMultipleCommands(originalTranscript, cleanedTranscript);
         };
         
         this.recognition.onend = () => {
@@ -131,6 +94,77 @@ export class VoiceController {
                 indicator.classList.remove('listening');
             }
         }
+    }
+
+    private parseAndExecuteMultipleCommands(originalTranscript: string, cleanedTranscript: string): void {
+        // 🌟 MULTIPLE COMMAND PARSING: Handle rapid-fire voice commands!
+        const commands = ['clear dance floor', 'dance party', 'restart the party'];
+        const executedCommands: string[] = [];
+        
+        // 🎵 FIRST: Check for musical intensity (multiple "dance" + "party")
+        const danceMatches = (originalTranscript.match(/dance/g) || []).length;
+        const partyMatches = (originalTranscript.match(/party/g) || []).length;
+        
+        if (danceMatches >= 2 && partyMatches >= 1) {
+            const intensity = Math.min(danceMatches, 5);
+            console.log(`🎤 🎵 MUSICAL INTENSITY DETECTED! ${danceMatches} dances = ${intensity}x party!`);
+            this.onCommandCallback('musical_dance_party', originalTranscript);
+            executedCommands.push(`musical_dance_party (${intensity}x)`);
+        }
+        
+        // 🔄 THEN: Look for multiple distinct commands in the transcript
+        // Sort by length to match longer commands first (avoid partial matches)
+        const sortedCommands = commands.sort((a, b) => b.length - a.length);
+        
+        for (const command of sortedCommands) {
+            // Count how many times this command appears in the transcript
+            const commandInstances = this.countCommandInstances(originalTranscript, cleanedTranscript, command);
+            
+            if (commandInstances > 0) {
+                // Execute this command the number of times it was detected
+                for (let i = 0; i < commandInstances; i++) {
+                    setTimeout(() => {
+                        this.onCommandCallback(command, originalTranscript);
+                    }, i * 150); // Small delay between commands for natural execution
+                }
+                executedCommands.push(`${command} (${commandInstances}x)`);
+            }
+        }
+        
+        if (executedCommands.length > 0) {
+            console.log(`🎤 ✨ MULTI-COMMAND EXECUTION: ${executedCommands.join(', ')}`);
+        } else {
+            console.log('🎤 No recognized commands found in transcript');
+        }
+    }
+
+    private countCommandInstances(originalTranscript: string, cleanedTranscript: string, command: string): number {
+        // Count explicit mentions of the command
+        let count = 0;
+        
+        // Method 1: Count direct mentions in original transcript
+        const originalMatches = (originalTranscript.match(new RegExp(command.replace(/\s+/g, '\\s+'), 'g')) || []).length;
+        count += originalMatches;
+        
+        // Method 2: Count mentions in cleaned transcript (but don't double-count)
+        const cleanedMatches = (cleanedTranscript.match(new RegExp(command.replace(/\s+/g, '\\s+'), 'g')) || []).length;
+        if (cleanedMatches > originalMatches) {
+            count += cleanedMatches - originalMatches;
+        }
+        
+        // Method 3: Special handling for repeated keywords
+        if (command === 'dance party') {
+            // Count instances of "dance party", "party dance", or just repeated "dance" near "party"
+            const danceCount = (originalTranscript.match(/\bdance\b/g) || []).length;
+            const partyCount = (originalTranscript.match(/\bparty\b/g) || []).length;
+            
+            // If we have multiple dances and parties, that's multiple dance party commands
+            if (danceCount > 1 && partyCount > 0) {
+                count = Math.max(count, Math.min(danceCount, partyCount));
+            }
+        }
+        
+        return count;
     }
 
     public getDanceIntensity(transcript: string): number {

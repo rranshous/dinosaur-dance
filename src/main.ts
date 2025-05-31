@@ -392,7 +392,7 @@ class DinosaurDanceGame {
     }
 
     private clearDanceFloor(): void {
-        // Move ALL dancers to the edges to make a dance circle!
+        // Clear ALL dancers from the center, including dance party dancers that might be outside the radius!
         const allDancers = this.plantedDinosaurs.slice(); // Copy the array
         const edgeMargin = 50; // Distance from screen edge
         const dancerSize = 60; // Dancer elements are 60px wide/tall
@@ -411,7 +411,10 @@ class DinosaurDanceGame {
                 Math.pow(currentX - centerX, 2) + Math.pow(currentY - centerY, 2)
             );
             
-            if (distanceFromCenter < centerRadius) {
+            // ENHANCED: Also check for dance party dancers specifically - they should ALL be moved!
+            const isDancePartyDancer = dancer.hasAttribute('data-dance-party');
+            
+            if (distanceFromCenter < centerRadius || isDancePartyDancer) {
                 // Move this dancer to the edges
                 let newX, newY;
                 
@@ -444,6 +447,10 @@ class DinosaurDanceGame {
                 dancer.style.transition = 'left 1.5s ease-out, top 1.5s ease-out';
                 dancer.style.left = newX + 'px';
                 dancer.style.top = newY + 'px';
+                
+                // Remove the dance party markers since they're now regular edge dancers
+                dancer.removeAttribute('data-dance-party');
+                dancer.removeAttribute('data-musical-intensity');
                 
                 // Remove transition after animation completes
                 setTimeout(() => {
