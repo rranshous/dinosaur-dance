@@ -12,10 +12,18 @@
 - **Step into the future of AI-collaborative creativity** where voice makes magic happen!
 
 ## 📦 Production Build Ready!
-✅ Our build is complete and optimized in the `dist/` folder:
-- `dist/index.html` - Main game file (4.80 kB)
-- `dist/assets/index-809eee05.js` - Compiled JavaScript (8.86 kB)
-- Total size: ~14 kB (very lightweight!)
+✅ Our latest build is complete and optimized in the `dist/` folder:
+- `dist/index.html` - Main game file (5.77 kB)
+- `dist/assets/index-72e8941e.js` - Compiled JavaScript (17.52 kB)
+- **Total size**: ~23 kB (lightweight and fast!)
+
+### ✨ **NEW IN THIS VERSION:**
+- **🏗️ Modular Architecture**: Refactored from 700+ line monolith to clean, maintainable modules
+- **🎵 Enhanced Musical Intensity**: Bigger dancers (80-120px), organic clustering, natural jitter
+- **🎤 Multi-Command Voice Processing**: Handle rapid commands like "dance party, dance party, clear"
+- **🎭 Enhanced Celebrations**: Voice commands now trigger the same magical effects as manual interactions
+- **🌊 Organic Formations**: Natural clustering replaces rigid grids for more joyful experience
+- **🔧 Professional Code Quality**: Zero compilation errors, proper TypeScript patterns
 
 ## 🚀 Step-by-Step itch.io Publishing Guide
 
@@ -109,9 +117,9 @@ Take some beautiful screenshots of:
 
 ## 🎬 Creating the ZIP File for Upload
 
-✅ **DONE!** Your ZIP file is ready: `dinosaur-dance-web.zip` (5.0 KB)
+✅ **DONE!** Your ZIP file is ready: `dinosaur-dance-web.zip` (10.9 KB)
 
-This contains your complete production build and is ready to upload to itch.io!
+This contains your complete production build with all the latest enhancements and is ready to upload to itch.io!
 
 ## 🎯 Final Publishing Steps
 
