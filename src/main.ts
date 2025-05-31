@@ -578,14 +578,40 @@ class DinosaurDanceGame {
         };
         
         this.recognition.onresult = (event: any) => {
-            const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
-            console.log('🎤 Voice input:', transcript);
+            const originalTranscript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
             
-            // Check if the transcript matches any command
-            for (const command in commands) {
-                if (transcript.includes(command)) {
+            // Clean transcript by removing common articles and filler words
+            const cleanedTranscript = originalTranscript
+                .replace(/\b(the|a|an|please|can|you|could|would)\b/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+            
+            console.log('🎤 Voice input:', originalTranscript, '-> cleaned:', cleanedTranscript);
+            
+            // Sort commands by length (longest first) to avoid partial matches
+            const sortedCommands = Object.keys(commands).sort((a, b) => b.length - a.length);
+            
+            // Try exact matching first on cleaned transcript
+            for (const command of sortedCommands) {
+                if (cleanedTranscript === command || cleanedTranscript.endsWith(command)) {
                     commands[command]();
-                    break;
+                    return;
+                }
+            }
+            
+            // Try exact matching on original transcript
+            for (const command of sortedCommands) {
+                if (originalTranscript === command || originalTranscript.endsWith(command)) {
+                    commands[command]();
+                    return;
+                }
+            }
+            
+            // Fallback to includes matching (longest first to avoid partial matches)
+            for (const command of sortedCommands) {
+                if (cleanedTranscript.includes(command) || originalTranscript.includes(command)) {
+                    commands[command]();
+                    return;
                 }
             }
         };
