@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "publish": "npm run build && mkdir -p releases && cd dist && zip -r ../releases/dinosaur-dance-web-$(date +%Y%m%d-%H%M%S).zip . && cd .. && echo '🎪 Ready for itch.io! Upload from releases/ folder'"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
